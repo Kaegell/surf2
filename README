@@ -1,3 +1,9 @@
+This is my current configuration of surf :
+- Downloads through aria2c
+- History
+- Bookmarks
+- [TODO] implementation of a more user-friendly dmenu interface
+
 surf - simple webkit-based browser
 ==================================
 surf is a simple Web browser based on WebKit/GTK+.
