@@ -54,13 +54,13 @@ static SearchEngine searchengines[] = {
 #define HOMEPAGE "https://duckduckgo.com/"
 #define SETPROP(p, q) { \
 	.v = (char *[]){ "/bin/sh", "-c", \
-		"prop=\"`(xprop -id $2 $0 | cut -d '\"' -f 2 | xargs -0 printf %b && "\
-                "cat ~/.surf/bookmarks) | dmenu`\" &&" \
- 		"xprop -id $2 -f $1 8s -set $1 \"$prop\"", \
+	     "prop=\"`xprop -id $2 $0 " \
+	     "| sed \"s/^$0(STRING) = \\(\\\\\"\\?\\)\\(.*\\)\\1$/\\2/\" " \
+	     "| xargs -0 printf %b | dmenu`\" &&" \
+	     "xprop -id $2 -f $1 8s -set $1 \"$prop\"", \
 	     p, q, winid, NULL \
 	} \
 }
-
 /* DOWNLOAD(URI, referer) */
 #define DOWNLOAD(d, r) { \
     .v = (char *[]){ "/bin/sh", "-c", \
@@ -93,9 +93,9 @@ static SiteStyle styles[] = {
 };
 
 #define BM_PICK { .v = (char *[]) { "/bin/sh", "-c", \
-"(echo `xprop -id $0 -f _SURF_GO 8s -set _SURF_GO \
+"xprop -id $0 -f _SURF_GO 8s -set _SURF_GO \
 	`cat ~/.surf/bookmarks | dmenu || exit 0`", \
-winid, NULL} }
+	winid, NULL} }
 
 #define BM_ADD { .v = (char *[]){ "/bin/sh", "-c", \
   "(echo `xprop -id $0 _SURF_URI | cut -d '\"' -f 2` && "\
