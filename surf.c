@@ -81,6 +81,11 @@ typedef struct {
 } Button;
 
 typedef struct {
+	char *token;
+	char *uri;
+} SearchEngine;
+
+typedef struct {
 	SoupCookieJarText parent_instance;
 	int lock;
 } CookieJar;
@@ -119,6 +124,7 @@ static char *buildfile(const char *path);
 static char *buildpath(const char *path);
 static gboolean buttonrelease(WebKitWebView *web, GdkEventButton *e, Client *c);
 static void cleanup(void);
+static gchar *parseuri(const gchar *uri);
 static void clipboard(Client *c, const Arg *arg);
 
 /* Cookiejar implementation */
@@ -433,7 +439,6 @@ cookiepolicy_get(void)
 	default:
 		break;
 	}
-
 	return SOUP_COOKIE_JAR_ACCEPT_ALWAYS;
 }
 
@@ -575,6 +580,22 @@ void
 destroywin(GtkWidget* w, Client *c)
 {
 	destroyclient(c);
+}
+
+static gchar *
+parseuri(const gchar *uri) {
+	guint i;
+
+	for(i = 0; i < LENGTH(searchengines); i++) {
+		if (searchengines[i].token == NULL || searchengines[i].uri == NULL ||
+				*(uri + strlen(searchengines[i].token)) != ' ')
+			continue;
+		if(g_str_has_prefix(uri, searchengines[i].token))
+			return g_strdup_printf(searchengines[i].uri, uri +
+					strlen(searchengines[i].token) + 1);
+	}
+	return g_strrstr(uri, "://") ? g_strdup(uri) : g_strdup_printf("http://%s",
+			uri);
 }
 
 void
@@ -840,8 +861,7 @@ loaduri(Client *c, const Arg *arg)
 		u = g_strdup_printf("file://%s", rp);
 		free(rp);
 	} else {
-		u = g_strrstr(uri, "://") || g_str_has_prefix(uri, "about:") ? g_strdup(uri)
-		    : g_strdup_printf("http://%s", uri);
+		u = parseuri(uri);
 	}
 
 	setatom(c, AtomUri, uri);

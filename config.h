@@ -35,6 +35,12 @@ static Bool loadimages            = TRUE;
 static Bool hidebackground        = FALSE;
 static Bool allowgeolocation      = TRUE;
 
+static SearchEngine searchengines[] = {
+	{"g","http://google.com/search?hl=en&source=hp&ie=ISO-8859-l&q=%s" },
+	{"ddg", "http://duckduckgo.com/?q=%s"},
+	{"a", "https://wiki.archlinux.org/index/php?title=Special%%3ASearch&search=%s&go=Go"},
+};
+
 #define SETPROP(p, q) { \
 	.v = (char *[]){ "/bin/sh", "-c", \
 		"prop=\"`(xprop -id $2 $0 | cut -d '\"' -f 2 | xargs -0 printf %b && "\
