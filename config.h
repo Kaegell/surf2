@@ -35,12 +35,23 @@ static Bool loadimages            = TRUE;
 static Bool hidebackground        = FALSE;
 static Bool allowgeolocation      = TRUE;
 
+#define SELNAV { \
+	.v = (char *[]){"/bin/sh", "-c", \
+	"prop=\"`xprop -id $0 _SURF_HIST" \
+	" | sed -e 's/^.[^\"]*\"//' -e 's/\"$//' -e 's/\\\\\\n/\\n/g'" \
+	" | dmenu -i -l 10`\"" \
+	"&& xprop -id $0 -f _SURF_NAV 8s -set _SURF_NAV \"$prop\"", \
+	winid, NULL \
+	} \
+}
+
 static SearchEngine searchengines[] = {
 	{"g","http://google.com/search?hl=en&source=hp&ie=ISO-8859-l&q=%s" },
 	{"ddg", "http://duckduckgo.com/?q=%s"},
-	{"a", "https://wiki.archlinux.org/index/php?title=Special%%3ASearch&search=%s&go=Go"},
+	{"a", "https://wiki.archlinux.org/index.php?title=Special%%3ASearch&search=%s&go=Go"},
 };
 
+#define HOMEPAGE "https://duckduckgo.com/"
 #define SETPROP(p, q) { \
 	.v = (char *[]){ "/bin/sh", "-c", \
 		"prop=\"`(xprop -id $2 $0 | cut -d '\"' -f 2 | xargs -0 printf %b && "\
@@ -81,6 +92,11 @@ static SiteStyle styles[] = {
 	{ ".*",                 "default.css" },
 };
 
+#define BM_PICK { .v = (char *[]) { "/bin/sh", "-c", \
+"(echo `xprop -id $0 -f _SURF_GO 8s -set _SURF_GO \
+	`cat ~/.surf/bookmarks | dmenu || exit 0`", \
+winid, NULL} }
+
 #define BM_ADD { .v = (char *[]){ "/bin/sh", "-c", \
   "(echo `xprop -id $0 _SURF_URI | cut -d '\"' -f 2` && "\
   "cat ~/.surf/bookmarks) | awk '!seen[$0]++' > ~/.surf/bookmarks_new && "\
@@ -112,10 +128,11 @@ static Key keys[] = {
 
 	{ MODKEY,               GDK_l,      navigate,   { .i = +1 } },
 	{ MODKEY,               GDK_h,      navigate,   { .i = -1 } },
-
+	{ MODKEY|GDK_SHIFT_MASK,GDK_h,		selhist,	SELNAV		},
 	{ MODKEY,               GDK_j,      scroll_v,   { .i = +1 } },
 	{ MODKEY,               GDK_k,      scroll_v,   { .i = -1 } },
-	{ MODKEY,               GDK_b,      spawn,		BM_ADD },
+	{ MODKEY|GDK_SHIFT_MASK,GDK_b,		spawn,		BM_PICK		},
+	{ MODKEY,               GDK_b,      spawn,		BM_ADD		},
 	{ MODKEY,               GDK_i,      scroll_h,   { .i = +1 } },
 	{ MODKEY,               GDK_u,      scroll_h,   { .i = -1 } },
 
